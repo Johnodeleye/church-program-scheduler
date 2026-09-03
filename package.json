@@ -3,17 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npm run db:check && next dev -p 3001",
+    "db:check": "node scripts/check-db.js",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p 3001",
+    "pwa": "npm run build && next start"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "html2pdf.js": "^0.14.0",
+    "lucide-react": "^1.39.0",
+    "mongoose": "^9.9.4",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
