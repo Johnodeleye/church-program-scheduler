@@ -408,7 +408,7 @@ export default function Dashboard() {
             </table>
             <div class="footer">
               <p>Total Sessions: ${data.length}</p>
-              <p>© ${new Date().getFullYear()} RCCG David's Pavilion - All Rights Reserved</p>
+              <p>© ${new Date().getFullYear()} RCCG David's Pavilion - All Rights Reseerved</p>
             </div>
           </div>
           <script>

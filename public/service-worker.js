@@ -1,15 +1,13 @@
-// Service Worker for PWA - DISABLED IN DEVELOPMENT
-const CACHE_NAME = 'rccg-schedule-v1';
+// Service Worker for PWA
+const CACHE_NAME = 'rccg-schedule-v2'; // CHANGED - Force new cache
 
 // Check if in development mode
 const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 if (isDevelopment) {
   console.log('🔧 Service Worker disabled in development mode');
-  // Immediately unregister any existing service workers
   self.skipWaiting();
   
-  // Override fetch to always go to network
   self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(event.request));
   });
@@ -29,22 +27,31 @@ if (isDevelopment) {
 
   self.addEventListener('install', (event) => {
     event.waitUntil(
-      caches.open(CACHE_NAME)
-        .then((cache) => {
-          console.log('📦 Caching assets');
-          return cache.addAll(urlsToCache);
-        })
-        .then(() => self.skipWaiting())
+      // Delete old caches first
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }).then(() => {
+        return caches.open(CACHE_NAME)
+          .then((cache) => {
+            console.log('📦 Caching assets');
+            return cache.addAll(urlsToCache);
+          });
+      }).then(() => self.skipWaiting())
     );
   });
 
   self.addEventListener('activate', (event) => {
-    const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheWhitelist.indexOf(cacheName) === -1) {
+            if (cacheName !== CACHE_NAME) {
               return caches.delete(cacheName);
             }
           })
