@@ -5,7 +5,8 @@ import {
   Trash2,
   FileText,
   Plus,
-  Calendar
+  Calendar,
+  Loader2
 } from "lucide-react";
 
 interface HeaderProps {
@@ -14,6 +15,7 @@ interface HeaderProps {
   onAddDates: () => void;
   onClearAll: () => void;
   onExport: () => void;
+  isDeletingAll?: boolean;
 }
 
 export default function Header({ 
@@ -21,7 +23,8 @@ export default function Header({
   onAutoGenerate, 
   onAddDates,
   onClearAll,
-  onExport
+  onExport,
+  isDeletingAll = false
 }: HeaderProps) {
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-blue-100/50 sticky top-0 z-50">
@@ -82,22 +85,31 @@ export default function Header({
             </button>
 
             <button
-  onClick={() => {
-    localStorage.removeItem('rccg_auth');
-    window.location.reload();
-  }}
-  className="p-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all"
-  title="Logout"
->
-  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-</button>
+              onClick={() => {
+                localStorage.removeItem('rccg_auth');
+                window.location.reload();
+              }}
+              className="p-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
 
             <button
               onClick={onClearAll}
-              className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+              disabled={isDeletingAll}
+              className={`p-2 rounded-xl transition-all ${
+                isDeletingAll 
+                  ? 'bg-red-100 text-red-400 cursor-not-allowed' 
+                  : 'text-red-500 hover:bg-red-50'
+              }`}
               title="Clear All"
             >
-              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              {isDeletingAll ? (
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
             </button>
           </div>
         </div>

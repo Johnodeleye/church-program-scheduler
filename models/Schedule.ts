@@ -16,7 +16,7 @@ const ScheduleSchema = new Schema<ISchedule>(
     },
     dayType: {
       type: String,
-      enum: ['Monday', 'Friday'],
+      enum: ['Sunday', 'Monday', 'Wednesday', 'Friday'],
       required: true,
     },
     leadMinister: {

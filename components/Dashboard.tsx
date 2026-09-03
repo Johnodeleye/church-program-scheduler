@@ -12,7 +12,7 @@ import html2pdf from "html2pdf.js";
 export interface ScheduleItem {
   id: string;
   date: Date;
-  dayType: "Monday" | "Friday";
+  dayType: "Sunday" | "Monday" | "Wednesday" | "Friday";
   leadMinister: string;
   praiseWorship: string;
   closingPrayer: string;
@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [showAddDates, setShowAddDates] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,12 +74,19 @@ export default function Dashboard() {
     
     while (current <= endDate) {
       const day = current.getDay();
-      if (day === 1 || day === 5) {
+      // Sunday=0, Monday=1, Wednesday=3, Friday=5
+      if (day === 0 || day === 1 || day === 3 || day === 5) {
         if (!isDateExists(current)) {
+          let dayType: "Sunday" | "Monday" | "Wednesday" | "Friday";
+          if (day === 0) dayType = "Sunday";
+          else if (day === 1) dayType = "Monday";
+          else if (day === 3) dayType = "Wednesday";
+          else dayType = "Friday";
+          
           dates.push({
             id: `${current.getTime()}-${Math.random()}`,
             date: new Date(current),
-            dayType: day === 1 ? "Monday" : "Friday",
+            dayType: dayType,
             leadMinister: "",
             praiseWorship: "",
             closingPrayer: "",
@@ -95,7 +104,7 @@ export default function Dashboard() {
     
     while (current <= endDate) {
       const day = current.getDay();
-      if (day === 1 || day === 5) {
+      if (day === 0 || day === 1 || day === 3 || day === 5) {
         if (isDateExists(current)) {
           existing.push(new Date(current));
         }
@@ -211,7 +220,7 @@ export default function Dashboard() {
     let current = new Date(startDate);
     while (current <= endDate) {
       const day = current.getDay();
-      if (day === 1 || day === 5) count++;
+      if (day === 0 || day === 1 || day === 3 || day === 5) count++;
       current.setDate(current.getDate() + 1);
     }
     return count;
@@ -284,6 +293,7 @@ export default function Dashboard() {
 
   const handleClearAll = async () => {
     if (confirm("Are you sure you want to clear all schedule data from the database?")) {
+      setIsDeletingAll(true);
       try {
         for (const item of schedule) {
           await deleteFromDatabase(item.id);
@@ -292,17 +302,22 @@ export default function Dashboard() {
         alert('✅ All schedules cleared successfully!');
       } catch (error) {
         alert('Failed to clear schedules. Please try again.');
+      } finally {
+        setIsDeletingAll(false);
       }
     }
   };
 
   const handleDeleteRow = async (id: string) => {
     if (confirm("Are you sure you want to delete this session?")) {
+      setDeletingRowId(id);
       try {
         await deleteFromDatabase(id);
         await fetchSchedules();
       } catch (error) {
         alert('Failed to delete. Please try again.');
+      } finally {
+        setDeletingRowId(null);
       }
     }
   };
@@ -319,10 +334,12 @@ export default function Dashboard() {
       return;
     }
 
-    // Calculate font size based on data length - SMALLER font for more rows
     let fontSize = 10;
     let padding = 4;
-    if (data.length > 40) {
+    if (data.length > 50) {
+      fontSize = 6.5;
+      padding = 1.5;
+    } else if (data.length > 40) {
       fontSize = 7;
       padding = 2;
     } else if (data.length > 30) {
@@ -349,136 +366,51 @@ export default function Dashboard() {
         <head>
           <title>RCCG David's Pavilion - Bible Study Schedule</title>
           <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              font-family: Arial, Helvetica, sans-serif;
-              background: white;
-              padding: 0;
-              margin: 0;
-              display: flex;
-              justify-content: center;
-              min-height: 100vh;
-            }
-            .pdf-container {
-              max-width: 1100px;
-              width: 100%;
-              background: white;
-              padding: 10px 15px 10px 15px;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 6px;
-              border-bottom: 2px solid #1a3a6b;
-              padding-bottom: 6px;
-            }
-            .logo {
-              width: 35px;
-              height: 35px;
-              margin: 0 auto 3px auto;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .logo img {
-              width: 100%;
-              height: 100%;
-              object-fit: contain;
-            }
-            .header h1 {
-              font-size: 16px;
-              color: #1a3a6b;
-              margin: 0;
-              letter-spacing: 1px;
-            }
-            .header h2 {
-              font-size: 12px;
-              color: #2a5a9b;
-              margin: 1px 0;
-              font-weight: normal;
-            }
-            .header p {
-              font-size: 9px;
-              color: #666;
-              margin: 0;
-            }
-            .header .range {
-              font-size: 8px;
-              color: #999;
-              margin-top: 1px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 6px;
-            }
-            th {
-              background: #1a3a6b;
-              color: white;
-              padding: ${Math.max(4, padding + 2)}px 6px;
-              border: 1px solid #1a3a6b;
-              text-align: left;
-              font-weight: bold;
-              font-size: ${Math.max(8, fontSize)}px;
-            }
-            td {
-              padding: ${padding}px 6px;
-              border: 1px solid #ddd;
-              font-size: ${fontSize}px;
-            }
-            tr:nth-child(even) {
-              background: #f8f9fa;
-            }
-            .footer {
-              text-align: center;
-              margin-top: 6px;
-              padding-top: 4px;
-              border-top: 1px solid #ddd;
-              font-size: 8px;
-              color: #999;
-            }
-            .footer p {
-              margin: 1px 0;
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, Helvetica, sans-serif; background: white; padding: 0; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+            .pdf-container { max-width: 1100px; width: 100%; background: white; padding: 10px 15px 10px 15px; }
+            .header { text-align: center; margin-bottom: 6px; border-bottom: 2px solid #1a3a6b; padding-bottom: 6px; }
+            .logo { width: 35px; height: 35px; margin: 0 auto 3px auto; display: flex; align-items: center; justify-content: center; }
+            .logo img { width: 100%; height: 100%; object-fit: contain; }
+            .header h1 { font-size: 16px; color: #1a3a6b; margin: 0; letter-spacing: 1px; }
+            .header h2 { font-size: 12px; color: #2a5a9b; margin: 1px 0; font-weight: normal; }
+            .header p { font-size: 9px; color: #666; margin: 0; }
+            .header .range { font-size: 8px; color: #999; margin-top: 1px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+            th { background: #1a3a6b; color: white; padding: ${Math.max(4, padding + 2)}px 6px; border: 1px solid #1a3a6b; text-align: left; font-weight: bold; font-size: ${Math.max(8, fontSize)}px; }
+            td { padding: ${padding}px 6px; border: 1px solid #ddd; font-size: ${fontSize}px; }
+            tr:nth-child(even) { background: #f8f9fa; }
+            .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ddd; font-size: 8px; color: #999; }
+            .footer p { margin: 1px 0; }
           </style>
         </head>
         <body>
           <div class="pdf-container" id="pdf-content">
             <div class="header">
-              <div class="logo">
-                <img src="/rccg.png" alt="RCCG Logo" />
-              </div>
+              <div class="logo"><img src="/rccg.png" alt="RCCG Logo" /></div>
               <h1>RCCG DAVID'S PAVILION</h1>
               <h2>BIBLE STUDY -- DIGGING DEEP</h2>
               <p>Generated: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
               ${start && end ? `<p class="range">Range: ${start.toLocaleDateString()} to ${end.toLocaleDateString()}</p>` : ''}
             </div>
-            
             <table>
               <thead>
                 <tr>
                   <th style="text-align: center; width: 5%;">S/N</th>
-                  <th style="width: 20%;">Date</th>
-                  <th style="text-align: center; width: 10%;">Day</th>
+                  <th style="width: 18%;">Date</th>
+                  <th style="text-align: center; width: 12%;">Day</th>
                   <th style="width: 22%;">Lead Minister</th>
                   <th style="width: 22%;">Praise/Worship</th>
                   <th style="width: 21%;">Closing Prayer</th>
                 </tr>
               </thead>
-              <tbody>
-                ${tableRows}
-              </tbody>
+              <tbody>${tableRows}</tbody>
             </table>
-            
             <div class="footer">
               <p>Total Sessions: ${data.length}</p>
               <p>© ${new Date().getFullYear()} RCCG David's Pavilion - All Rights Reserved</p>
             </div>
           </div>
-
           <script>
             function downloadPDF() {
               const element = document.getElementById('pdf-content');
@@ -486,29 +418,15 @@ export default function Dashboard() {
                 margin: [3, 3, 3, 3],
                 filename: 'RCCG_Schedule_${new Date().toISOString().split('T')[0]}.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                  scale: 1.5,
-                  useCORS: true,
-                  letterRendering: true,
-                  width: 1100,
-                  logging: false,
-                  scrollY: 0,
-                  windowHeight: element.scrollHeight
-                },
-                jsPDF: { 
-                  unit: 'mm', 
-                  format: 'a4', 
-                  orientation: 'landscape' 
-                },
+                html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, width: 1100, logging: false, scrollY: 0, windowHeight: element.scrollHeight },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
                 pagebreak: { mode: 'avoid-all' }
               };
               html2pdf().set(opt).from(element).save();
             }
           </script>
           <div style="text-align:center; margin-top:10px;">
-            <button onclick="downloadPDF()" style="padding:8px 24px; background:#1a3a6b; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">
-              📥 Download PDF
-            </button>
+            <button onclick="downloadPDF()" style="padding:8px 24px; background:#1a3a6b; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">📥 Download PDF</button>
             <p style="font-size:10px; color:#888; margin-top:3px;">Click the button above to download as PDF</p>
           </div>
           <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -557,6 +475,7 @@ export default function Dashboard() {
         onAddDates={() => setShowAddDates(true)}
         onClearAll={handleClearAll}
         onExport={() => setShowExport(true)}
+        isDeletingAll={isDeletingAll}
       />
       
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 relative">
@@ -577,6 +496,7 @@ export default function Dashboard() {
             schedule={schedule}
             onEdit={handleEdit}
             onDelete={handleDeleteRow}
+            deletingRowId={deletingRowId}
           />
         </div>
       </div>

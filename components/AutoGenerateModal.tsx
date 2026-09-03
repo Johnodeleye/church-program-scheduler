@@ -39,6 +39,18 @@ export default function AutoGenerateModal({ onClose, onGenerate }: AutoGenerateM
     return days;
   };
 
+  const getDayColor = (day: number) => {
+    if (day === 0) return "bg-red-500"; // Sunday
+    if (day === 1) return "bg-blue-500"; // Monday
+    if (day === 3) return "bg-green-500"; // Wednesday
+    if (day === 5) return "bg-purple-500"; // Friday
+    return null;
+  };
+
+  const isHighlightedDay = (day: number) => {
+    return day === 0 || day === 1 || day === 3 || day === 5;
+  };
+
   const handleDateClick = (date: Date) => {
     if (selecting === "start") {
       setTempStart(date);
@@ -87,7 +99,7 @@ export default function AutoGenerateModal({ onClose, onGenerate }: AutoGenerateM
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Auto-Generate Schedule</h2>
-              <p className="text-sm text-gray-500">Select date range for Mondays & Fridays</p>
+              <p className="text-sm text-gray-500">Select date range for Sundays, Mondays, Wednesdays & Fridays</p>
             </div>
           </div>
           <button
@@ -172,14 +184,15 @@ export default function AutoGenerateModal({ onClose, onGenerate }: AutoGenerateM
                           ? "bg-blue-100 text-blue-700"
                           : "hover:bg-blue-50 text-gray-700"
                       } ${
-                        date.getDay() === 1 || date.getDay() === 5
+                        isHighlightedDay(date.getDay())
                           ? "ring-2 ring-blue-200/50 ring-offset-1"
                           : ""
                       }`}
                     >
                       {date.getDate()}
-                      {(date.getDay() === 1 || date.getDay() === 5) && (
-                        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-blue-400 rounded-full" />
+                      {/* Colored dot for specific days */}
+                      {getDayColor(date.getDay()) && (
+                        <span className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 ${getDayColor(date.getDay())} rounded-full ring-1 ring-white shadow-sm`} />
                       )}
                     </button>
                   ) : (
@@ -189,7 +202,7 @@ export default function AutoGenerateModal({ onClose, onGenerate }: AutoGenerateM
               ))}
             </div>
 
-            <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
+            <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-blue-500 ring-2 ring-blue-200" />
                 Selected
@@ -199,32 +212,44 @@ export default function AutoGenerateModal({ onClose, onGenerate }: AutoGenerateM
                 In Range
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full border-2 border-blue-200/50" />
-                Mon/Fri
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 ring-1 ring-white" />
+                Sun
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-1 ring-white" />
+                Mon
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500 ring-1 ring-white" />
+                Wed
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 ring-1 ring-white" />
+                Fri
               </span>
             </div>
           </div>
 
           <div className="flex gap-2 pt-4">
-  <button
-    onClick={onClose}
-    className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition text-sm"
-  >
-    Cancel
-  </button>
-  <button
-    onClick={handleConfirm}
-    disabled={!tempStart || !tempEnd}
-    className={`flex-1 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-sm ${
-      !tempStart || !tempEnd
-        ? "opacity-50 cursor-not-allowed"
-        : "hover:shadow-lg hover:shadow-blue-200"
-    }`}
-  >
-    <Sparkles className="w-3.5 h-3.5" />
-    Generate
-  </button>
-</div>
+            <button
+              onClick={onClose}
+              className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!tempStart || !tempEnd}
+              className={`flex-1 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-sm ${
+                !tempStart || !tempEnd
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:shadow-lg hover:shadow-blue-200"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Generate
+            </button>
+          </div>
         </div>
       </div>
     </div>

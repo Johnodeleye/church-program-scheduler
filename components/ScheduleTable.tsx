@@ -1,13 +1,19 @@
 import { ScheduleItem } from "./Dashboard";
-import { Edit, Calendar, Clock, Trash2 } from "lucide-react";
+import { Edit, Calendar, Clock, Trash2, Loader2 } from "lucide-react";
 
 interface ScheduleTableProps {
   schedule: ScheduleItem[];
   onEdit: (item: ScheduleItem) => void;
   onDelete: (id: string) => void;
+  deletingRowId?: string | null;
 }
 
-export default function ScheduleTable({ schedule, onEdit, onDelete }: ScheduleTableProps) {
+export default function ScheduleTable({ 
+  schedule, 
+  onEdit, 
+  onDelete,
+  deletingRowId = null
+}: ScheduleTableProps) {
   if (schedule.length === 0) {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/30 p-12 text-center">
@@ -22,11 +28,21 @@ export default function ScheduleTable({ schedule, onEdit, onDelete }: ScheduleTa
         </p>
         <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
           <Clock className="w-4 h-4" />
-          <span>Generate all Mondays & Fridays for any date range</span>
+          <span>Generate all Sundays, Mondays, Wednesdays & Fridays for any date range</span>
         </div>
       </div>
     );
   }
+
+  const getDayColor = (dayType: string) => {
+    switch(dayType) {
+      case 'Sunday': return 'bg-red-100 text-red-700';
+      case 'Monday': return 'bg-blue-100 text-blue-700';
+      case 'Wednesday': return 'bg-green-100 text-green-700';
+      case 'Friday': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/30 overflow-hidden relative">
@@ -63,7 +79,7 @@ export default function ScheduleTable({ schedule, onEdit, onDelete }: ScheduleTa
                 key={item.id}
                 className={`hover:bg-blue-50/50 transition-colors ${
                   index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'
-                }`}
+                } ${deletingRowId === item.id ? 'opacity-50' : ''}`}
               >
                 <td className="px-6 py-4 text-sm font-medium text-gray-600">
                   {index + 1}
@@ -76,11 +92,7 @@ export default function ScheduleTable({ schedule, onEdit, onDelete }: ScheduleTa
                   })}
                 </td>
                 <td className="px-6 py-4 text-sm">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    item.dayType === 'Monday' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'bg-purple-100 text-purple-700'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDayColor(item.dayType)}`}>
                     {item.dayType}
                   </span>
                 </td>
@@ -97,17 +109,29 @@ export default function ScheduleTable({ schedule, onEdit, onDelete }: ScheduleTa
                   <div className="flex items-center justify-center gap-1">
                     <button
                       onClick={() => onEdit(item)}
-                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all group"
+                      disabled={deletingRowId === item.id}
+                      className={`p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all group ${
+                        deletingRowId === item.id ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                       title="Edit"
                     >
                       <Edit className="w-4 h-4 group-hover:scale-110 transition" />
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-all group"
+                      disabled={deletingRowId === item.id}
+                      className={`p-2 rounded-lg transition-all group ${
+                        deletingRowId === item.id 
+                          ? 'text-gray-400 cursor-not-allowed' 
+                          : 'text-red-500 hover:bg-red-100'
+                      }`}
                       title="Delete"
                     >
-                      <Trash2 className="w-4 h-4 group-hover:scale-110 transition" />
+                      {deletingRowId === item.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4 group-hover:scale-110 transition" />
+                      )}
                     </button>
                   </div>
                 </td>
