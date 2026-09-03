@@ -47,39 +47,6 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
-        
-        {/* Force clear old cache and service workers */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Force clear old service workers
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                  for (let registration of registrations) {
-                    registration.unregister();
-                    console.log('Unregistered old service worker');
-                  }
-                });
-              }
-              
-              // Clear cache
-              if ('caches' in window) {
-                caches.keys().then(function(names) {
-                  for (let name of names) {
-                    caches.delete(name);
-                    console.log('Deleted cache:', name);
-                  }
-                });
-              }
-              
-              // Reload after 1 second
-              setTimeout(function() {
-                window.location.reload();
-              }, 1000);
-            `,
-          }}
-        />
-
         {/* Register Service Worker - Only in production */}
         <script
           dangerouslySetInnerHTML={{

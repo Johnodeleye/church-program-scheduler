@@ -1,5 +1,5 @@
 // Service Worker for PWA
-const CACHE_NAME = 'rccg-schedule-v2'; // CHANGED - Force new cache
+const CACHE_NAME = 'rccg-schedule-v2'; // CHANGE THIS VERSION NUMBER!
 
 // Check if in development mode
 const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
