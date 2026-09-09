@@ -29,7 +29,6 @@ export default function Dashboard() {
   const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSchedules();
@@ -38,7 +37,6 @@ export default function Dashboard() {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      // Add cache-busting timestamp to prevent caching
       const response = await fetch(`/api/schedule?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
@@ -209,16 +207,6 @@ export default function Dashboard() {
       return;
     }
     
-    const totalPossible = getDaysCount(start, end);
-    if (newDates.length < totalPossible) {
-      const existingCount = totalPossible - newDates.length;
-      if (existingCount > 0) {
-        if (!confirm(`${existingCount} date(s) already exist in your schedule and will be skipped.\n\n${newDates.length} new date(s) will be added.\n\nContinue?`)) {
-          return;
-        }
-      }
-    }
-    
     try {
       const result = await saveToDatabase(newDates);
       await fetchSchedules();
@@ -230,17 +218,6 @@ export default function Dashboard() {
     } catch (error) {
       alert('Failed to save to database. Please try again.');
     }
-  };
-
-  const getDaysCount = (startDate: Date, endDate: Date): number => {
-    let count = 0;
-    let current = new Date(startDate);
-    while (current <= endDate) {
-      const day = current.getDay();
-      if (day === 0 || day === 1 || day === 3 || day === 5) count++;
-      current.setDate(current.getDate() + 1);
-    }
-    return count;
   };
 
   const handleEdit = (item: ScheduleItem) => {
@@ -479,17 +456,17 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-blue-600 font-semibold">Loading schedule...</p>
+          <div className="w-20 h-20 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-6 text-purple-600 font-semibold text-lg">Loading schedule...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <Header 
         scheduleCount={schedule.length}
         onAutoGenerate={() => setShowAutoGenerate(true)}
@@ -502,7 +479,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 relative">
         {schedule.length > 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-            <div className="text-center select-none opacity-[0.08]">
+            <div className="text-center select-none opacity-[0.04]">
               <img 
                 src="/rccg.png" 
                 alt="RCCG Logo" 

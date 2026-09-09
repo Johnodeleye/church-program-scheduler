@@ -9,8 +9,6 @@ interface AddDatesModalProps {
 }
 
 export default function AddDatesModal({ onClose, onGenerate }: AddDatesModalProps) {
-  const [startDate, setStartDate] = useState(new Date(2027, 0, 1));
-  const [endDate, setEndDate] = useState(new Date(2027, 5, 30));
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selecting, setSelecting] = useState<"start" | "end">("start");
   const [tempStart, setTempStart] = useState<Date | null>(null);
@@ -40,10 +38,10 @@ export default function AddDatesModal({ onClose, onGenerate }: AddDatesModalProp
   };
 
   const getDayColor = (day: number) => {
-    if (day === 0) return "bg-red-500"; // Sunday
-    if (day === 1) return "bg-blue-500"; // Monday
-    if (day === 3) return "bg-green-500"; // Wednesday
-    if (day === 5) return "bg-purple-500"; // Friday
+    if (day === 0) return "bg-gradient-to-br from-rose-500 to-pink-500";
+    if (day === 1) return "bg-gradient-to-br from-blue-500 to-cyan-500";
+    if (day === 3) return "bg-gradient-to-br from-emerald-500 to-teal-500";
+    if (day === 5) return "bg-gradient-to-br from-violet-500 to-purple-500";
     return null;
   };
 
@@ -71,127 +69,125 @@ export default function AddDatesModal({ onClose, onGenerate }: AddDatesModalProp
     }
   };
 
-  const isSelected = (date: Date) => {
-    if (!tempStart || !tempEnd) return false;
-    const d = new Date(date);
-    const start = new Date(tempStart);
-    const end = new Date(tempEnd);
-    return d >= start && d <= end;
-  };
-
   const isInRange = (date: Date) => {
     if (!tempStart || !tempEnd) return false;
-    const d = new Date(date);
-    const start = new Date(tempStart);
-    const end = new Date(tempEnd);
-    return d >= start && d <= end;
+    return date >= tempStart && date <= tempEnd;
+  };
+
+  const isEdgeDate = (date: Date) => {
+    if (!tempStart || !tempEnd) return false;
+    return date.getTime() === tempStart.getTime() || date.getTime() === tempEnd.getTime();
   };
 
   const days = getDaysInMonth(currentMonth);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white">
-              <Plus className="w-5 h-5" />
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 animate-in zoom-in-95 duration-300">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 rounded-t-3xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                <Plus className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Add More Dates</h2>
+                <p className="text-sm text-white/80 mt-0.5">Extend your schedule range</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Add More Dates</h2>
-              <p className="text-sm text-gray-500">Extend schedule beyond current range (Sundays, Mondays, Wednesdays & Fridays)</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-xl transition-all duration-200"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[120px]">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Start Date
               </label>
               <button
                 onClick={() => setSelecting("start")}
-                className={`w-full px-4 py-2.5 rounded-xl border-2 text-left transition ${
+                className={`w-full px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-200 ${
                   selecting === "start"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-lg shadow-blue-100"
+                    : "border-gray-200 hover:border-blue-300 bg-white"
                 }`}
               >
-                {tempStart ? tempStart.toLocaleDateString() : "Select date"}
+                {tempStart ? tempStart.toLocaleDateString() : "Select start date"}
               </button>
             </div>
-            <div className="flex-1 min-w-[120px]">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 End Date
               </label>
               <button
                 onClick={() => setSelecting("end")}
-                className={`w-full px-4 py-2.5 rounded-xl border-2 text-left transition ${
+                className={`w-full px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-200 ${
                   selecting === "end"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 shadow-lg shadow-purple-100"
+                    : "border-gray-200 hover:border-purple-300 bg-white"
                 }`}
               >
-                {tempEnd ? tempEnd.toLocaleDateString() : "Select date"}
+                {tempEnd ? tempEnd.toLocaleDateString() : "Select end date"}
               </button>
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
               <button
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                className="p-2 hover:bg-white rounded-xl transition"
+                className="p-2.5 hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5 text-gray-700" />
               </button>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </h3>
               <button
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                className="p-2 hover:bg-white rounded-xl transition"
+                className="p-2.5 hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow"
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5 text-gray-700" />
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                <div key={day} className="text-center text-xs font-semibold text-gray-400 py-1">
+            <div className="grid grid-cols-7 gap-2 mb-3">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day, idx) => (
+                <div key={day} className={`text-center text-xs font-bold py-2 ${
+                  isHighlightedDay(idx) ? "text-blue-600" : "text-gray-400"
+                }`}>
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-2">
               {days.map((date, index) => (
-                <div key={index} className="aspect-square p-1">
+                <div key={index} className="aspect-square">
                   {date ? (
                     <button
                       onClick={() => handleDateClick(date)}
-                      className={`w-full h-full rounded-xl text-sm font-medium transition-all relative ${
-                        isSelected(date)
-                          ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg"
+                      className={`w-full h-full rounded-xl text-sm font-semibold transition-all duration-200 relative ${
+                        isEdgeDate(date)
+                          ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg scale-105 ring-4 ring-blue-200"
                           : isInRange(date)
-                          ? "bg-blue-100 text-blue-700"
-                          : "hover:bg-blue-50 text-gray-700"
+                          ? "bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700"
+                          : "hover:bg-gradient-to-br hover:from-gray-100 hover:to-blue-50 text-gray-700 hover:scale-105"
                       } ${
                         isHighlightedDay(date.getDay())
-                          ? "ring-2 ring-blue-200/50 ring-offset-1"
+                          ? "ring-2 ring-blue-300/30"
                           : ""
                       }`}
                     >
                       {date.getDate()}
                       {getDayColor(date.getDay()) && (
-                        <span className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 ${getDayColor(date.getDay())} rounded-full ring-1 ring-white shadow-sm`} />
+                        <span className={`absolute top-0 right-0 w-2 h-2 ${getDayColor(date.getDay())} rounded-full ring-2 ring-white shadow-sm`} />
                       )}
                     </button>
                   ) : (
@@ -201,51 +197,43 @@ export default function AddDatesModal({ onClose, onGenerate }: AddDatesModalProp
               ))}
             </div>
 
-            <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 flex-wrap">
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-blue-500 ring-2 ring-blue-200" />
-                Selected
+            <div className="flex items-center gap-4 mt-6 text-xs flex-wrap justify-center">
+              <span className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                <span className="w-3 h-3 rounded-full bg-gradient-to-br from-rose-500 to-pink-500" />
+                Sunday
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-blue-100 ring-2 ring-blue-200/50" />
-                In Range
+              <span className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                <span className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500" />
+                Monday
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 ring-1 ring-white" />
-                Sun
+              <span className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                <span className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500" />
+                Wednesday
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-1 ring-white" />
-                Mon
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500 ring-1 ring-white" />
-                Wed
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 ring-1 ring-white" />
-                Fri
+              <span className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                <span className="w-3 h-3 rounded-full bg-gradient-to-br from-violet-500 to-purple-500" />
+                Friday
               </span>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4">
+          <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
-              className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition text-sm"
+              className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={!tempStart || !tempEnd}
-              className={`flex-1 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-sm ${
+              className={`flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                 !tempStart || !tempEnd
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:shadow-lg hover:shadow-blue-200"
+                  : "hover:shadow-xl hover:shadow-purple-200 hover:scale-[1.02]"
               }`}
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-5 h-5" />
               Add Dates
             </button>
           </div>

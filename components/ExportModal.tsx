@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, FileText, Calendar, Download, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { X, FileText, Download, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { ScheduleItem } from "./Dashboard";
 
 interface ExportModalProps {
@@ -55,20 +55,14 @@ export default function ExportModal({ onClose, schedule, onExport }: ExportModal
     }
   };
 
-  const isSelected = (date: Date) => {
-    if (!tempStart || !tempEnd) return false;
-    const d = new Date(date);
-    const start = new Date(tempStart);
-    const end = new Date(tempEnd);
-    return d >= start && d <= end;
-  };
-
   const isInRange = (date: Date) => {
     if (!tempStart || !tempEnd) return false;
-    const d = new Date(date);
-    const start = new Date(tempStart);
-    const end = new Date(tempEnd);
-    return d >= start && d <= end;
+    return date >= tempStart && date <= tempEnd;
+  };
+
+  const isEdgeDate = (date: Date) => {
+    if (!tempStart || !tempEnd) return false;
+    return date.getTime() === tempStart.getTime() || date.getTime() === tempEnd.getTime();
   };
 
   const days = getDaysInMonth(currentMonth);
@@ -88,136 +82,138 @@ export default function ExportModal({ onClose, schedule, onExport }: ExportModal
   const canExport = mode === "all" || (tempStart && tempEnd);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl text-white">
-              <FileText className="w-5 h-5" />
+    <div className="fixed inset-0 bg-gradient-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 animate-in zoom-in-95 duration-300">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-6 rounded-t-3xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Export Schedule</h2>
+                <p className="text-sm text-white/80 mt-0.5">Download as PDF with church template</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Export Schedule</h2>
-              <p className="text-sm text-gray-500">Export as PDF with church template</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-xl transition-all duration-200"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-6">
           {schedule.length === 0 ? (
-            <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 text-center">
-              <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-              <h3 className="font-bold text-amber-700 text-lg">No Schedule Data</h3>
-              <p className="text-amber-600 text-sm mt-1">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
+              <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+              <h3 className="font-bold text-amber-700 text-xl">No Schedule Data</h3>
+              <p className="text-amber-600 mt-2">
                 Please generate a schedule first before exporting.
               </p>
             </div>
           ) : (
             <>
-              <div className="flex gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   onClick={() => setMode("all")}
-                  className={`flex-1 px-4 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
+                  className={`px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3 ${
                     mode === "all"
-                      ? "bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-200"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  <FileText className="w-4 h-4" />
+                  <FileText className="w-5 h-5" />
                   Export All ({schedule.length})
                 </button>
                 <button
                   onClick={() => setMode("range")}
-                  className={`flex-1 px-4 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
+                  className={`px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3 ${
                     mode === "range"
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-200"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  <Calendar className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                   Date Range
                 </button>
               </div>
 
               {mode === "range" && (
                 <>
-                  <div className="flex gap-4 flex-wrap">
-                    <div className="flex-1 min-w-[120px]">
-                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Start Date
                       </label>
                       <button
                         onClick={() => setSelecting("start")}
-                        className={`w-full px-4 py-2.5 rounded-xl border-2 text-left transition ${
+                        className={`w-full px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-200 ${
                           selecting === "start"
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
-                            : "border-gray-200 hover:border-blue-300"
+                            ? "border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 shadow-lg shadow-emerald-100"
+                            : "border-gray-200 hover:border-emerald-300 bg-white"
                         }`}
                       >
-                        {tempStart ? tempStart.toLocaleDateString() : "Select date"}
+                        {tempStart ? tempStart.toLocaleDateString() : "Select start date"}
                       </button>
                     </div>
-                    <div className="flex-1 min-w-[120px]">
-                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         End Date
                       </label>
                       <button
                         onClick={() => setSelecting("end")}
-                        className={`w-full px-4 py-2.5 rounded-xl border-2 text-left transition ${
+                        className={`w-full px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-200 ${
                           selecting === "end"
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
-                            : "border-gray-200 hover:border-blue-300"
+                            ? "border-cyan-500 bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-700 shadow-lg shadow-cyan-100"
+                            : "border-gray-200 hover:border-cyan-300 bg-white"
                         }`}
                       >
-                        {tempEnd ? tempEnd.toLocaleDateString() : "Select date"}
+                        {tempEnd ? tempEnd.toLocaleDateString() : "Select end date"}
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-4">
+                  <div className="bg-gradient-to-br from-gray-50 to-teal-50/30 rounded-2xl p-6 border border-gray-100">
+                    <div className="flex items-center justify-between mb-6">
                       <button
                         onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                        className="p-2 hover:bg-white rounded-xl transition"
+                        className="p-2.5 hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow"
                       >
-                        <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        <ChevronLeft className="w-5 h-5 text-gray-700" />
                       </button>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
                         {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                       </h3>
                       <button
                         onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                        className="p-2 hover:bg-white rounded-xl transition"
+                        className="p-2.5 hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow"
                       >
-                        <ChevronRight className="w-5 h-5 text-gray-600" />
+                        <ChevronRight className="w-5 h-5 text-gray-700" />
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-7 gap-1 mb-2">
+                    <div className="grid grid-cols-7 gap-2 mb-3">
                       {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                        <div key={day} className="text-center text-xs font-semibold text-gray-400 py-1">
+                        <div key={day} className="text-center text-xs font-bold text-gray-400 py-2">
                           {day}
                         </div>
                       ))}
                     </div>
 
-                    <div className="grid grid-cols-7 gap-1">
+                    <div className="grid grid-cols-7 gap-2">
                       {days.map((date, index) => (
-                        <div key={index} className="aspect-square p-1">
+                        <div key={index} className="aspect-square">
                           {date ? (
                             <button
                               onClick={() => handleDateClick(date)}
-                              className={`w-full h-full rounded-xl text-sm font-medium transition-all relative ${
-                                isSelected(date)
-                                  ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg"
+                              className={`w-full h-full rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                isEdgeDate(date)
+                                  ? "bg-gradient-to-br from-emerald-600 to-cyan-600 text-white shadow-lg scale-105 ring-4 ring-emerald-200"
                                   : isInRange(date)
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "hover:bg-blue-50 text-gray-700"
+                                  ? "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700"
+                                  : "hover:bg-gradient-to-br hover:from-gray-100 hover:to-teal-50 text-gray-700 hover:scale-105"
                               }`}
                             >
                               {date.getDate()}
@@ -232,29 +228,29 @@ export default function ExportModal({ onClose, schedule, onExport }: ExportModal
                 </>
               )}
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={onClose}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition"
+                  className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleExport}
                   disabled={!canExport || isExporting}
-                  className={`flex-1 px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
+                  className={`flex-1 px-6 py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                     !canExport || isExporting
                       ? "opacity-50 cursor-not-allowed"
-                      : "hover:shadow-lg hover:shadow-green-200"
+                      : "hover:shadow-xl hover:shadow-emerald-200 hover:scale-[1.02]"
                   }`}
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                   {isExporting ? "Generating..." : "Export PDF"}
                 </button>
               </div>
 
               {mode === "range" && !tempStart && !tempEnd && (
-                <p className="text-center text-xs text-gray-400">
+                <p className="text-center text-sm text-gray-400">
                   Select start and end dates from the calendar above
                 </p>
               )}

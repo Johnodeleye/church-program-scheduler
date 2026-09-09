@@ -32,32 +32,34 @@ export default function EditRowModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Edit Session</h2>
-            <p className="text-xs text-gray-500">
-              {item.date.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })} - {item.dayType}
-            </p>
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-900/40 via-purple-900/40 to-pink-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md border border-white/20 animate-in zoom-in-95 duration-300">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 rounded-t-3xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Edit Session</h2>
+              <p className="text-sm text-white/80 mt-1">
+                {item.date.toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })} - {item.dayType}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={isSaving}
+              className="p-2 hover:bg-white/20 rounded-xl transition-all duration-200 disabled:opacity-50"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            disabled={isSaving}
-            className="p-1.5 hover:bg-gray-100 rounded-xl transition disabled:opacity-50"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-3">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              <User className="w-3.5 h-3.5 inline mr-1.5 text-blue-500" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <User className="w-4 h-4 text-blue-500" />
               Lead Minister
             </label>
             <input
@@ -65,14 +67,14 @@ export default function EditRowModal({
               value={form.leadMinister}
               onChange={(e) => setForm({ ...form, leadMinister: e.target.value })}
               disabled={isSaving}
-              className="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-gray-900 text-sm disabled:opacity-50"
+              className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 disabled:opacity-50"
               placeholder="Enter lead minister name"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              <Music className="w-3.5 h-3.5 inline mr-1.5 text-blue-500" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <Music className="w-4 h-4 text-purple-500" />
               Praise/Worship
             </label>
             <input
@@ -80,14 +82,14 @@ export default function EditRowModal({
               value={form.praiseWorship}
               onChange={(e) => setForm({ ...form, praiseWorship: e.target.value })}
               disabled={isSaving}
-              className="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-gray-900 text-sm disabled:opacity-50"
+              className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-200 text-gray-900 disabled:opacity-50"
               placeholder="Enter praise/worship leader"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              <Church className="w-3.5 h-3.5 inline mr-1.5 text-blue-500" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <Church className="w-4 h-4 text-pink-500" />
               Closing Prayer
             </label>
             <input
@@ -95,35 +97,35 @@ export default function EditRowModal({
               value={form.closingPrayer}
               onChange={(e) => setForm({ ...form, closingPrayer: e.target.value })}
               disabled={isSaving}
-              className="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-gray-900 text-sm disabled:opacity-50"
+              className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-100 transition-all duration-200 text-gray-900 disabled:opacity-50"
               placeholder="Enter closing prayer minister"
             />
           </div>
 
-          <div className="flex gap-2 pt-3">
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition text-sm disabled:opacity-50"
+              className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className={`flex-1 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-sm ${
-                isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-blue-200'
+              className={`flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl hover:shadow-purple-200 hover:scale-[1.02]'
               }`}
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save className="w-3.5 h-3.5" />
+                  <Save className="w-5 h-5" />
                   Save
                 </>
               )}
