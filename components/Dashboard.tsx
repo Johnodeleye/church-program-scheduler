@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,7 +38,15 @@ export default function Dashboard() {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/schedule');
+      // Add cache-busting timestamp to prevent caching
+      const response = await fetch(`/api/schedule?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       const result = await response.json();
       
       if (result.success) {
@@ -74,7 +83,6 @@ export default function Dashboard() {
     
     while (current <= endDate) {
       const day = current.getDay();
-      // Sunday=0, Monday=1, Wednesday=3, Friday=5
       if (day === 0 || day === 1 || day === 3 || day === 5) {
         if (!isDateExists(current)) {
           let dayType: "Sunday" | "Monday" | "Wednesday" | "Friday";
@@ -118,7 +126,10 @@ export default function Dashboard() {
     try {
       const response = await fetch('/api/schedule', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
         body: JSON.stringify({ schedules }),
       });
       
@@ -139,7 +150,10 @@ export default function Dashboard() {
     try {
       const response = await fetch(`/api/schedule/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
         body: JSON.stringify(data),
       });
       
@@ -160,6 +174,9 @@ export default function Dashboard() {
     try {
       const response = await fetch(`/api/schedule/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
       });
       
       const result = await response.json();
@@ -232,6 +249,7 @@ export default function Dashboard() {
   };
 
   const handleSaveEdit = async (updated: ScheduleItem) => {
+    setIsSaving(true);
     try {
       await updateInDatabase(updated.id, {
         leadMinister: updated.leadMinister,
@@ -241,8 +259,11 @@ export default function Dashboard() {
       await fetchSchedules();
       setShowEditModal(false);
       setEditingItem(null);
+      alert('✅ Schedule updated successfully!');
     } catch (error) {
       alert('Failed to update. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -408,7 +429,7 @@ export default function Dashboard() {
             </table>
             <div class="footer">
               <p>Total Sessions: ${data.length}</p>
-              <p>© ${new Date().getFullYear()} RCCG David's Pavilion - All Rights Reseerved</p>
+              <p>© ${new Date().getFullYear()} RCCG David's Pavilion - All Rights Reserved</p>
             </div>
           </div>
           <script>
@@ -516,6 +537,7 @@ export default function Dashboard() {
             setEditingItem(null);
           }}
           onSave={handleSaveEdit}
+          isSaving={isSaving}
         />
       )}
 
